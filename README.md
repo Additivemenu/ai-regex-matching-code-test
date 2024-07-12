@@ -22,3 +22,5 @@ pip install -r requirements.txt
 ```
 
 ## frontend
++ React + TypeScript + Tailwind CSS
++ with minimum use of UI library
