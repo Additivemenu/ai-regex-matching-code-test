@@ -1,6 +1,7 @@
 # ai-regex-matching-code-test
 
 ## backend
++ django with dajngo-ninja to build RESTful API
 
 disable conda environment to avoid dependency conflicts if any
 ```shell
@@ -24,3 +25,4 @@ pip install -r requirements.txt
 ## frontend
 + React + TypeScript + Tailwind CSS
 + with minimum use of UI library
+

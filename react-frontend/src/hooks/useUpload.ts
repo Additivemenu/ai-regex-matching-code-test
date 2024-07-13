@@ -34,6 +34,7 @@ const useFileUpload = (): UseFileUploadResult => {
       const response = await uploadFileRequest(selectedFile);
 
       if (response.status === 200) {
+        // TODO: collect response data
         setUploadStatus(FileUploadStatus.FILE_UPLOADED_SUCCESSFULLY);
       }
     } catch (error) {

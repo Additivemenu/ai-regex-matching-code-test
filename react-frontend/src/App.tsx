@@ -9,12 +9,13 @@ function App() {
 
   const { selectedFile, uploadStatus, handleFileChange, handleUpload } =
     useFileUpload();
-    
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault(); // prevent the default refreshing browser behavior on form submit
 
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
+    await handleUpload();
     setIsLoading(false);
   };
 
