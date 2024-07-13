@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { uploadFileRequest } from "../libs/http";
+import { Data } from "../interfaces/TableData";
 
 interface UseFileUploadResult {
   selectedFile: File | null;
@@ -14,7 +15,9 @@ enum FileUploadStatus {
   ERROR_UPLOADING_FILE = "Error uploading file",
 }
 
-const useFileUpload = (): UseFileUploadResult => {
+const useFileUpload = (
+  setParsedFileData: React.Dispatch<React.SetStateAction<Data[]>>
+): UseFileUploadResult => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>("");
 
@@ -34,7 +37,8 @@ const useFileUpload = (): UseFileUploadResult => {
       const response = await uploadFileRequest(selectedFile);
 
       if (response.status === 200) {
-        // TODO: collect response data
+        // console.log("response data:", response.data.data);
+        setParsedFileData(response.data.data); // FIXME: when to use JSON.parse(response.data) ?
         setUploadStatus(FileUploadStatus.FILE_UPLOADED_SUCCESSFULLY);
       }
     } catch (error) {
