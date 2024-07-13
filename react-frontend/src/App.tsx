@@ -2,10 +2,14 @@ import React, { useState } from "react";
 import "./App.css";
 import Card from "./components/wrappers/Card";
 import Button from "./components/buttons/Button";
+import useFileUpload from "./hooks/useUpload";
 
 function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const { selectedFile, uploadStatus, handleFileChange, handleUpload } =
+    useFileUpload();
+    
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault(); // prevent the default refreshing browser behavior on form submit
 
@@ -27,7 +31,12 @@ function App() {
               please upload a csv or excel file for processing
             </label>
             <br />
-            <input id="file-upload" type="file" accept=".csv, .xls, .xlsx" />
+            <input
+              id="file-upload"
+              type="file"
+              accept=".csv, .xls, .xlsx"
+              onChange={handleFileChange}
+            />
           </div>
           <span> {isLoading ? "isLoading" : "not loading"}</span>
           <Button isLoading={isLoading}>upload</Button>
