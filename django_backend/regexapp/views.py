@@ -12,7 +12,7 @@ from openai import OpenAI
 
 api = NinjaAPI()
 
-from regexapp.services.openai import queryOpenAI
+from regexapp.services.openai import query_open_ai
 from regexapp.ninja_schema.schema import TableUpdateRequestBody
 
 from django.conf import settings
@@ -57,39 +57,33 @@ def update_table(request, request_body: TableUpdateRequestBody):
     if len(table_data) == 0:
         raise HTTPException(status_code=400, detail="Table data is empty")  # FIXME: add more specific error message
 
-    # res = queryOpenAI("find the email address column in the table and replace them with 'hello'")
-    res = queryOpenAI(user_query)
+    # LLM_res = queryOpenAI("find the email address column in the table and replace them with 'hello'")
+    LLM_res = query_open_ai(user_query)
 
      # verify if user specified column name is really in the table data
     table_data_headers = table_data[0].keys()
-    if res['column_name'] not in table_data_headers:
+    if LLM_res.column_name not in table_data_headers:
         raise HTTPException(status_code=400, detail="Column name not found in table data, please type in a valid table header name")
     print('table data headers:', table_data_headers)
 
+
     # TODO: then do the table updates based on the regex expression and replacement value
     print('--------start processing table data ----------')
-    # print('to_regex:', res['to_regex'])
-    print('to_regex:', res.to_regex)
-    print('column_name:', res['column_name'])
-
-    # Apply regex to each value under the specified column
-    # for row in table_data:
-    #     row['column_name'] = re.sub(res['to_regex'], '', row['column_name'])
 
     df = pd.DataFrame(table_data)
     # ! value replacing query
-    df[res['column_name']] = df[res['column_name']].apply(lambda x: re.sub(res['to_regex'], res['replacement'], x))  # FIXME: x might not be a string
+    df[LLM_res.column_name] = df[LLM_res.column_name].apply(lambda x: re.sub(LLM_res.to_regex, LLM_res.replacement, x))  # FIXME: x might not be a string
     result_json = df.to_json(orient='records', lines=False)  # ! not in real json format, but in json lines format
     # result_json = json.loads(result_json)
 
 
     # ! data transformation query
     # TODO: may be consider regex transforming number field in the future, just consider string for now!
-    # df[res['column_name']] = df[res['column_name']].apply(lambda x: re.sub(res['to_regex'], 'Intl', x)) # Apply the regex to the specified column
+    # df[LLM_res['column_name']] = df[LLM_res['column_name']].apply(lambda x: re.sub(LLM_res['to_regex'], 'Intl', x)) # Apply the regex to the specified column
     # result_json = df.to_json(orient='records', lines=False)
 
 
-    return JsonResponse({"updated_table_data": result_json, "query": user_query, "response": res})
+    return JsonResponse({"updated_table_data": result_json, "query": user_query, "response": LLM_res.to_dict()})
     
 
     
