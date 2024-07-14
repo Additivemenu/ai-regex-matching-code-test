@@ -25,8 +25,8 @@ export const updateTableDataRequest = async (
   const url = `${API_URL}/regexapp/api/v1/table/natural-language-update`;
 
   const response = await axios.post(url, {
-    query,
-    tableData,
+    user_query: query,
+    table_data: tableData,
   });
 
   return response;

@@ -124,7 +124,7 @@ function App() {
             id="user-prompt"
             type="text"
             placeholder="find the email address in the table and replace it with the phone number"
-            className="border border-slate-900 p-1 mr-2"
+            className="border border-slate-900 p-1 mr-2 w-[50%]"
           />
           <Button>confirm</Button>
         </form>
