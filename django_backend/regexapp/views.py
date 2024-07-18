@@ -58,7 +58,9 @@ def update_table(request, request_body: TableUpdateRequestBody):
         raise HTTPException(status_code=400, detail="Table data is empty")  # FIXME: add more specific error message
 
     # LLM_res = queryOpenAI("find the email address column in the table and replace them with 'hello'")
+    print('------------ start querying OpenAI API ------------')
     LLM_res = query_open_ai(user_query)
+    print('------------ end querying OpenAI API ------------')
 
      # verify if user specified column name is really in the table data
     table_data_headers = table_data[0].keys()
@@ -71,10 +73,11 @@ def update_table(request, request_body: TableUpdateRequestBody):
     print('--------start processing table data ----------')
 
     df = pd.DataFrame(table_data)
+
     # ! value replacing query
-    df[LLM_res.column_name] = df[LLM_res.column_name].apply(lambda x: re.sub(LLM_res.to_regex, LLM_res.replacement, x))  # FIXME: x might not be a string
-    result_json = df.to_json(orient='records', lines=False)  # ! not in real json format, but in json lines format
-    # result_json = json.loads(result_json)
+    df[LLM_res.column_name] = df[LLM_res.column_name].apply(lambda x: re.sub(LLM_res.regex_pattern, LLM_res.replacement, x) if pd.notnull(x) else x)  
+    updated_table_data = df.to_dict(orient='records')
+
 
 
     # ! data transformation query
@@ -83,7 +86,11 @@ def update_table(request, request_body: TableUpdateRequestBody):
     # result_json = df.to_json(orient='records', lines=False)
 
 
-    return JsonResponse({"updated_table_data": result_json, "query": user_query, "response": LLM_res.to_dict()})
+    return JsonResponse({
+        "user_query": user_query, 
+        "LLM_res": LLM_res.to_dict(),
+        "updated_table_data": updated_table_data
+        })
     
 
     

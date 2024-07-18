@@ -56,7 +56,6 @@ const FileUploadForm = ({ setParsedFileData }: IFileUploadFormProps) => {
             onChange={handleFileChange}
           />
         </div>
-        <span> {isLoading ? "isLoading" : "not loading"}</span>
         <Button isLoading={isLoading}>upload</Button>
       </form>
       <ToastModal />

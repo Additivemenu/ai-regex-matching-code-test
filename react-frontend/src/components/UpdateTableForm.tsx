@@ -7,16 +7,23 @@ import { AxiosError } from "axios";
 
 interface IUpdateTableFormProps {
   parsedFileData: Data[];
+  setParsedFileData: React.Dispatch<React.SetStateAction<Data[]>>;
 }
 
-const UpdateTableForm = ({ parsedFileData }: IUpdateTableFormProps) => {
+const UpdateTableForm = ({
+  parsedFileData,
+  setParsedFileData,
+}: IUpdateTableFormProps) => {
   const { ToastModal, openToast } = useToast();
 
   const handleUpdateTableData = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (parsedFileData.length === 0) {
-      alert("please upload a file first");
+      openToast({
+        toastMessage: "Please upload a file first!",
+        toastLevel: "error",
+      });
       return;
     }
 
@@ -26,18 +33,21 @@ const UpdateTableForm = ({ parsedFileData }: IUpdateTableFormProps) => {
     ).value;
     // alert(userPrompt);
     try {
-      await updateTableDataRequest(userPrompt, parsedFileData);
+      const response = await updateTableDataRequest(userPrompt, parsedFileData);
 
+      setParsedFileData(response.data.updated_table_data as Data[]);
       openToast({
         toastMessage: "Table updated successfully!",
         toastLevel: "success",
       });
     } catch (error) {
-        // FIXME: how to display detailed error message?
+      // FIXME: how to display detailed error message?
       if (error instanceof AxiosError) {
         console.error("Error updating table:", error);
         openToast({
-          toastMessage: "Error updating table: " + error.response!.data.detail ?? error.message,
+          toastMessage:
+            "Error updating table: " + error.response!.data.detail ??
+            error.message,
           toastLevel: "error",
         });
       }

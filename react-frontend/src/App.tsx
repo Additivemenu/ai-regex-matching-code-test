@@ -17,7 +17,10 @@ function App() {
       <FileUploadForm setParsedFileData={setParsedFileData} />
 
       <Card className="result-card mt-4">
-        <UpdateTableForm parsedFileData={parsedFileData} />
+        <UpdateTableForm
+          parsedFileData={parsedFileData}
+          setParsedFileData={setParsedFileData}
+        />
 
         <div className="h-[1px] bg-slate-900 my-2" />
 

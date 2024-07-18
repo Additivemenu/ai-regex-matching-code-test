@@ -19,7 +19,6 @@ environ.Env.read_env()
 
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
-print('inside settings.py: ',OPENAI_API_KEY)  # FIXME: remove this
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
