@@ -65,7 +65,7 @@ def update_table(request, request_body: TableUpdateRequestBody):
      # verify if user specified column name is really in the table data
     table_data_headers = table_data[0].keys()
     if LLM_res.column_name not in table_data_headers:
-        raise HTTPException(status_code=400, detail="Column name not found in table data, please type in a valid table header name")
+        raise HTTPException(status_code=404, detail="Column name not found in table data, please check your spelling (note column name should be case sensitive) and type in a valid table header name")
     print('table data headers:', table_data_headers)
 
 

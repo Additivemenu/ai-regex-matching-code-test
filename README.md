@@ -19,8 +19,11 @@ source new_venv/bin/activate # on Mac
 
 # install dependencies
 pip install -r requirements.txt
-
 ```
+
+LLM choice: OpenAI gpt4o. 
++ Find `django_backend/django_backend/.env.example` file, copy and rename it `.env` file, fill your OpenAI api key
+
 
 ## frontend
 + React + TypeScript + Tailwind CSS

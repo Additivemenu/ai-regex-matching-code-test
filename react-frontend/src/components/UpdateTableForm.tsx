@@ -59,18 +59,34 @@ const UpdateTableForm = ({
   return (
     <form onSubmit={handleUpdateTableData}>
       <label htmlFor="user-prompt">
-        please specify your prompt:{" "}
-        <span className="text-sm">
-          (e.g. find the email address in the table and replace it with the
-          phone number)
-        </span>{" "}
+        <span className="text-lg">
+          Please specify your prompt used to transform or replace value in the
+          table:{" "}
+        </span>
+        <ul className="text-sm text-slate-400">
+          <li>
+            note please specify exactly one column name with case sensitivity in
+            the prompt
+          </li>
+          <li>
+            (e.g. find the Email address in the table and replace it with the
+            'regex' )
+          </li>
+          <li>
+            (e.g. find the state column and replace value 'TX' with 'Texas')
+          </li>
+          <li className="text-[red]">
+            (e.g. find the latitude column, and trim the number to 2 decimal
+            points)
+          </li>
+        </ul>
       </label>
       <br />
       <input
         id="user-prompt"
         type="text"
-        placeholder="find the email address in the table and replace it with the phone number"
-        className="border border-slate-900 p-1 mr-2 w-[50%]"
+        placeholder="find the <column name> in the table and replace the value with <desired value>"
+        className="border border-slate-900 p-1 mr-2 w-[50%] overflow-auto"
       />
       <Button>confirm</Button>
       <ToastModal />
