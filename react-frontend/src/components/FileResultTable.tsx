@@ -14,16 +14,22 @@ import { Data } from "../interfaces/TableData";
 
 interface FileResultTableProps {
   tableData: Data[];
+  highlightColumn: string;
 }
 
-const FileResultTable = ({ tableData }: FileResultTableProps) => {
+const FileResultTable = ({
+  tableData,
+  highlightColumn,
+}: FileResultTableProps) => {
   // Extract the keys from the first object to dynamically create table headers
-  const keys = tableData.length > 0 ? Object.keys(tableData[0]) : [];
+  const headers = tableData.length > 0 ? Object.keys(tableData[0]) : [];
 
   console.log("tableData: ", tableData);
   if (tableData.length > 0) {
     console.log("tableData length bigger than 0");
   }
+
+  // const highlightColumn = "country";
 
   return (
     <>
@@ -33,16 +39,35 @@ const FileResultTable = ({ tableData }: FileResultTableProps) => {
           <Table>
             <TableHead>
               <TableRow>
-                {keys.map((key) => (
-                  <TableCell key={key}>{key}</TableCell>
+                {headers.map((header) => (
+                  <TableCell
+                    key={header}
+                    style={{
+                      backgroundColor:
+                        header === highlightColumn ? "yellow" : "inherit",
+                      transition: "background-color 2s ease",
+                    }}
+                  >
+                    {header}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {tableData.map((row) => (
-                <TableRow key={uuidv4()}>
-                  {keys.map((key) => (
-                    <TableCell key={key}>{row[key]}</TableCell>
+              {tableData.map((row, index) => (
+                // since we don't add or delete columns, we can safely use the index as the key
+                <TableRow key={index}>
+                  {headers.map((header) => (
+                    <TableCell
+                      key={index + header}
+                      style={{
+                        backgroundColor:
+                          header === highlightColumn ? "yellow" : "inherit",
+                        transition: "background-color 2s ease",
+                      }}
+                    >
+                      {row[header]}
+                    </TableCell>
                   ))}
                 </TableRow>
               ))}

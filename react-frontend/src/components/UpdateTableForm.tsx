@@ -8,11 +8,13 @@ import { AxiosError } from "axios";
 interface IUpdateTableFormProps {
   parsedFileData: Data[];
   setParsedFileData: React.Dispatch<React.SetStateAction<Data[]>>;
+  setHighlightColumn: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const UpdateTableForm = ({
   parsedFileData,
   setParsedFileData,
+  setHighlightColumn,
 }: IUpdateTableFormProps) => {
   const { ToastModal, openToast } = useToast();
 
@@ -36,12 +38,12 @@ const UpdateTableForm = ({
       const response = await updateTableDataRequest(userPrompt, parsedFileData);
 
       setParsedFileData(response.data.updated_table_data as Data[]);
+      setHighlightColumn(response.data.LLM_res.column_name as string);
       openToast({
         toastMessage: "Table updated successfully!",
         toastLevel: "success",
       });
     } catch (error) {
-      // FIXME: how to display detailed error message?
       if (error instanceof AxiosError) {
         console.error("Error updating table:", error);
         openToast({
@@ -56,6 +58,26 @@ const UpdateTableForm = ({
     }
   };
 
+  // jsx -----------------------------------------------------------------------
+
+  const samplePromptList = (
+    <ul className="text-sm text-slate-400">
+      <li>
+        note please specify exactly one column name with case sensitivity in the
+        prompt
+      </li>
+      <li>
+        (e.g. replace: find the Email column in the table and replace the value
+        with 'regex' )
+      </li>
+      <li>
+        (e.g. replace: find the state column and replace value 'TX' with
+        'Texas')
+      </li>
+      <li>(e.g. transform: normalize Test1 column )</li>
+    </ul>
+  );
+
   return (
     <form onSubmit={handleUpdateTableData}>
       <label htmlFor="user-prompt">
@@ -63,22 +85,7 @@ const UpdateTableForm = ({
           Please specify your prompt used to transform or replace value in the
           table:{" "}
         </span>
-        <ul className="text-sm text-slate-400">
-          <li>
-            note please specify exactly one column name with case sensitivity in
-            the prompt
-          </li>
-          <li>
-            (e.g. replace: find the Email column in the table and replace the value with
-            'regex' )
-          </li>
-          <li>
-            (e.g. replace: find the state column and replace value 'TX' with 'Texas')
-          </li>
-          <li>
-            (e.g. transform: normalize Test1 column )
-          </li>
-        </ul>
+        {samplePromptList}
       </label>
       <br />
       <input
