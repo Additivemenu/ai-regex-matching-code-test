@@ -1,5 +1,9 @@
 # ai-regex-matching-code-test
 
+
+## Sample csv file
+see sample csv file under `/samples` directory
+
 ## backend
 + django with dajngo-ninja to build RESTful API
 
@@ -22,10 +26,18 @@ pip install -r requirements.txt
 ```
 
 LLM choice: OpenAI gpt4o. 
-+ Find `django_backend/django_backend/.env.example` file, copy and rename it `.env` file, fill your OpenAI api key
++ Find `django_backend/django_backend/.env.example` file, copy and paste it at the same directory level and rename it `.env` file, then fill your OpenAI api key
 
 
 ## frontend
 + React + TypeScript + Tailwind CSS
-+ with minimum use of UI library
++ Material UI used to build the table interface
 
+
+```javascript
+cd /react-frontend
+
+npm install
+
+npm start
+```

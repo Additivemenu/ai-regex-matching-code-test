@@ -35,11 +35,13 @@ def upload_csv(request, file: UploadedFile = File(...)):
     # Read the CSV file into a pandas DataFrame
     df = pd.read_csv(file)
     
-   # formatting the table data
+    # formatting the table data
     df = df.where(pd.notnull(df), None)
     
-    df.columns = df.columns.str.strip() # Remove leading and trailing spaces from column names
+    # Remove leading and trailing spaces from column names
+    df.columns = df.columns.str.strip() 
     
+    # Remove redundant starting and ending quotes from the values
     def remove_quotes(value):
         if isinstance(value, str):
             value = value.strip()
