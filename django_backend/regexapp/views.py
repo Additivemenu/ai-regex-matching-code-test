@@ -1,7 +1,4 @@
 
-from http.client import HTTPException
-import json
-import re
 from django.shortcuts import render
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
@@ -9,10 +6,12 @@ import pandas as pd
 from django.http import JsonResponse
 from ninja.errors import HttpError
 from openai import OpenAI
+from enum import Enum
 
 api = NinjaAPI()
 
 from regexapp.services.openai import query_open_ai
+from regexapp.services.regex_replacement import handle_regex_replacement
 from regexapp.ninja_schema.schema import TableUpdateRequestBody
 
 from django.conf import settings
@@ -20,7 +19,6 @@ from django.conf import settings
 
 @api.get("/", )
 def hello(request):
-
     # return 'hello world'
     print(settings.OPENAI_API_KEY)
     return JsonResponse({"message": settings.OPENAI_API_KEY})
@@ -45,52 +43,39 @@ def upload_csv(request, file: UploadedFile = File(...)):
     return JsonResponse({"data": data})
 
 
+class QueryType(str, Enum):
+    REPLACE = "replace"
+    TRANSFORM = "transform"
+    
 # request body has user natural language query and table data
 @api.post("/table/natural-language-update")
 def update_table(request, request_body: TableUpdateRequestBody):
     # Get the JSON data from the request
     table_data = request_body.table_data
     user_query = request_body.user_query
+    query_type = user_query.split(":")[0].lower()
+    if query_type is None:
+        raise HttpError(400, "Please specify query type in the query string, <query_string>: <query_content>")
+    if query_type not in [QueryType.REPLACE, QueryType.TRANSFORM]:
+        raise HttpError(400, "Invalid query type, please specify either 'replace:' or 'transform:' at the start of your query")
+    if table_data is None or len(table_data) == 0:
+        raise HttpError(400, "Table data is empty!")
 
-    print(user_query)
-
-    if len(table_data) == 0:
-        raise HTTPException(status_code=400, detail="Table data is empty")  # FIXME: add more specific error message
-
-    # LLM_res = queryOpenAI("find the email address column in the table and replace them with 'hello'")
-    print('------------ start querying OpenAI API ------------')
-    LLM_res = query_open_ai(user_query)
-    print('------------ end querying OpenAI API ------------')
-
-     # verify if user specified column name is really in the table data
-    table_data_headers = table_data[0].keys()
-    if LLM_res.column_name not in table_data_headers:
-        raise HTTPException(status_code=404, detail="Column name not found in table data, please check your spelling (note column name should be case sensitive) and type in a valid table header name")
-    print('table data headers:', table_data_headers)
+    df = None
+    LLM_res = None
+    if query_type == QueryType.REPLACE:
+        print('handle replace query')
+        df, LLM_res = handle_regex_replacement(table_data, user_query)
+    elif query_type == QueryType.TRANSFORM:
+        print('handle transform query')
 
 
-    # TODO: then do the table updates based on the regex expression and replacement value
-    print('--------start processing table data ----------')
-
-    df = pd.DataFrame(table_data)
-
-    # ! value replacing query
-    df[LLM_res.column_name] = df[LLM_res.column_name].apply(lambda x: re.sub(LLM_res.regex_pattern, LLM_res.replacement, x) if pd.notnull(x) else x)  
     updated_table_data = df.to_dict(orient='records')
-
-
-
-    # ! data transformation query
-    # TODO: may be consider regex transforming number field in the future, just consider string for now!
-    # df[LLM_res['column_name']] = df[LLM_res['column_name']].apply(lambda x: re.sub(LLM_res['to_regex'], 'Intl', x)) # Apply the regex to the specified column
-    # result_json = df.to_json(orient='records', lines=False)
-
-
     return JsonResponse({
         "user_query": user_query, 
         "LLM_res": LLM_res.to_dict(),
         "updated_table_data": updated_table_data
-        })
+    })
     
 
     

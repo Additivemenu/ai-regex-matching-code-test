@@ -13,7 +13,7 @@ from django.conf import settings
 
 # TODO: use class instead, not dictionary
 class OpenAIRegexQueryResponse:
-    def __init__(self, regex_pattern: Optional[str], replacement: Optional[str], column_name: Optional[str]):
+    def __init__(self, regex_pattern: str, replacement: str, column_name: str):
         self.regex_pattern = regex_pattern 
         self.replacement = replacement 
         self.column_name = column_name
@@ -32,7 +32,7 @@ class OpenAIRegexQueryResponse:
 #     column_name: str
 
 
-def query_open_ai(query:str) -> OpenAIRegexQueryResponse:
+def query_open_ai_for_regex_replacement(query:str) -> OpenAIRegexQueryResponse:
     client = OpenAI(api_key=settings.OPENAI_API_KEY)
     # print('inside queryOpenAI: ',settings.OPENAI_API_KEY)
 
@@ -57,7 +57,7 @@ def query_open_ai(query:str) -> OpenAIRegexQueryResponse:
             'column_name': 'column name'
         }
         '''
-        # Extract the JSON content using regex to remove the surrounding backticks and "json" label (OpenAI return markdown format json) 
+        # Extract the JSON content using regex to remove the surrounding backticks and "json" label (as OpenAI api return markdown format json) 
         json_content_str = re.search(r'```json\s*({.*})\s*```', raw_result.content, re.DOTALL).group(1) 
         parsed_dict = json.loads(json_content_str)  
         print('parsed LLM response: ', parsed_dict)
@@ -67,11 +67,18 @@ def query_open_ai(query:str) -> OpenAIRegexQueryResponse:
         missing_fields = [field for field in required_fields if field not in parsed_dict] # Check if all required fields are present
         if missing_fields:
             raise HttpError(500, f"Unexpected error: Missing fields from OpenAI API calling- {', '.join(missing_fields)}, please try again")
-
+        if any([parsed_dict[field] is None for field in required_fields]):
+            raise HttpError(500, "Unexpected error: OpenAI API response contains None value, please try again")
+    
+    
         # validate if user specify a column name 
         if not parsed_dict['column_name']:
             raise HttpError(400, "Bad request: Column name is not specified, please specify a column name in the query")
-
+        
+        # force to use lazy matching
+        if parsed_dict['regex_pattern'] == ".*":
+            parsed_dict['regex_pattern'] = ".+"
+        
         return OpenAIRegexQueryResponse(parsed_dict['regex_pattern'], parsed_dict['replacement'], parsed_dict['column_name'])
     except Exception as e:
         raise e

@@ -69,15 +69,11 @@ const UpdateTableForm = ({
             the prompt
           </li>
           <li>
-            (e.g. find the Email address in the table and replace it with the
+            (e.g. replace: find the Email address in the table and replace it with the
             'regex' )
           </li>
           <li>
-            (e.g. find the state column and replace value 'TX' with 'Texas')
-          </li>
-          <li className="text-[red]">
-            (e.g. find the latitude column, and trim the number to 2 decimal
-            points)
+            (e.g. replace: find the state column and replace value 'TX' with 'Texas')
           </li>
         </ul>
       </label>
