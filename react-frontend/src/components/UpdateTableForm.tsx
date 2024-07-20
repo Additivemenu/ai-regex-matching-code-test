@@ -69,11 +69,14 @@ const UpdateTableForm = ({
             the prompt
           </li>
           <li>
-            (e.g. replace: find the Email address in the table and replace it with the
+            (e.g. replace: find the Email column in the table and replace the value with
             'regex' )
           </li>
           <li>
             (e.g. replace: find the state column and replace value 'TX' with 'Texas')
+          </li>
+          <li>
+            (e.g. transform: normalize Test1 column )
           </li>
         </ul>
       </label>

@@ -5,13 +5,14 @@ from ninja.files import UploadedFile
 import pandas as pd
 from django.http import JsonResponse
 from ninja.errors import HttpError
-from openai import OpenAI
 from enum import Enum
 
 api = NinjaAPI()
 
-from regexapp.services.openai import query_open_ai
+from regexapp.services.openai import query_open_ai_for_regex_replacement
 from regexapp.services.regex_replacement import handle_regex_replacement
+from regexapp.services.data_transformation import handle_data_transformation
+from regexapp.services.openai import query_open_ai_for_data_transformation
 from regexapp.ninja_schema.schema import TableUpdateRequestBody
 
 from django.conf import settings
@@ -19,9 +20,11 @@ from django.conf import settings
 
 @api.get("/", )
 def hello(request):
-    # return 'hello world'
-    print(settings.OPENAI_API_KEY)
-    return JsonResponse({"message": settings.OPENAI_API_KEY})
+    # user_query = "fill the missing values in the column 'age' with 0.0"
+    user_query = "normalize the column 'age'"
+    LLM_res = query_open_ai_for_data_transformation(user_query)
+    print('LLM_res:', LLM_res.to_dict())
+    return JsonResponse({"data": LLM_res.to_dict()})
     
 
 
@@ -32,12 +35,22 @@ def upload_csv(request, file: UploadedFile = File(...)):
     # Read the CSV file into a pandas DataFrame
     df = pd.read_csv(file)
     
-    # ! Replace NaN values with None
+   # formatting the table data
     df = df.where(pd.notnull(df), None)
+    
+    df.columns = df.columns.str.strip() # Remove leading and trailing spaces from column names
+    
+    def remove_quotes(value):
+        if isinstance(value, str):
+            value = value.strip()
+            value = value.strip('"')
+            return value
+        return value
+    df = df.applymap(remove_quotes)
     
     # Convert DataFrame to a dictionary for easy JSON serialization
     data = df.to_dict(orient='records')
-
+    
     # TODO: store the table in a mongodb database running in docker -> api url should include file or table id
 
     return JsonResponse({"data": data})
@@ -68,6 +81,7 @@ def update_table(request, request_body: TableUpdateRequestBody):
         df, LLM_res = handle_regex_replacement(table_data, user_query)
     elif query_type == QueryType.TRANSFORM:
         print('handle transform query')
+        df, LLM_res = handle_data_transformation(table_data, user_query)
 
 
     updated_table_data = df.to_dict(orient='records')

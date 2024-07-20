@@ -10,7 +10,7 @@ def handle_regex_replacement(table_data, user_query):
     LLM_res = query_open_ai_for_regex_replacement(user_query)
     print('------------ end querying OpenAI API ------------')
 
-        # verify if user specified column name is really in the table data
+    # verify if user specified column name is really in the table data
     table_data_headers = table_data[0].keys()
     if LLM_res.column_name not in table_data_headers:
         raise HTTPException(status_code=404, detail="Column name not found in table data, please check your spelling (note column name should be case sensitive) and type in a valid table header name")
