@@ -9,6 +9,8 @@ A web application that allows user to upload CSV or Excel files, display results
 ## Sample csv/excel files
 see sample data file under `/samples` directory
 
+## Demo video
+https://www.loom.com/share/19453edd8bbc4ac6bf3937a2dcc7320a?sid=f5de4a23-0c8a-4e47-ab07-ea14dcbcf0db
 
 ## Back-End
 tech stack:
