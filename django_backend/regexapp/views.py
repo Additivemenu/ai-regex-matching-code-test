@@ -1,4 +1,3 @@
-
 from django.shortcuts import render
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile

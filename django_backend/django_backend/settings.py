@@ -19,6 +19,10 @@ environ.Env.read_env()
 
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
+CELERY_BROKER_URL = 'redis://redis:6379/0'  # should use service name in docker container, not localhost
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+# Add this configuration to handle the warning
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
