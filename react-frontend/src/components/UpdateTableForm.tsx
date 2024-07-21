@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Button from "./buttons/Button";
 import { Data } from "../interfaces/TableData";
 import { updateTableDataRequest } from "../libs/http";
@@ -17,6 +17,7 @@ const UpdateTableForm = ({
   setHighlightColumn,
 }: IUpdateTableFormProps) => {
   const { ToastModal, openToast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleUpdateTableData = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -35,6 +36,7 @@ const UpdateTableForm = ({
     ).value;
     // alert(userPrompt);
     try {
+      setIsLoading(true);
       const response = await updateTableDataRequest(userPrompt, parsedFileData);
 
       setParsedFileData(response.data.updated_table_data as Data[]);
@@ -55,29 +57,40 @@ const UpdateTableForm = ({
       }
     } finally {
       form.reset();
+      setIsLoading(false);
     }
   };
 
   // jsx -----------------------------------------------------------------------
-
   const samplePromptList = (
     <ul className="text-sm text-slate-400">
       <li>
-        note please specify exactly one column name with case sensitivity in the
-        prompt
+        note please specify exactly one column name{" "}
+        <span className="font-bold">with case sensitivity</span> in the prompt
       </li>
-      <li>
-        (e.g. replace: find the Email column in the table and replace the value
-        with 'regex' )
-      </li>
-      <li>
-        (e.g. replace: find the state column and replace value 'TX' with
-        'Texas')
-      </li>
-      <li>
-        (e.g. transform: fill the missing value with 0 in the Test1 column)
-      </li>
-      <li>(e.g. transform: normalize Test1 column )</li>
+      <ul>
+        <li className="text-slate-900">
+          for regex matching and replacement query, please specify 'replace:' at
+          the start of your prompt
+        </li>
+        <li>
+          (e.g. replace: find the Website column and remove 'http://' and 'https://' at the start)
+        </li>
+        <li>
+          (e.g. replace: find the state column and replace value 'TX' with
+          'Texas')
+        </li>
+      </ul>
+      <ul>
+        <li className="text-slate-900">
+          for data transformation query, please specify 'transform:' at the
+          start of your prompt - note only filling missing value and normalize a numerical column is supported {" "}
+        </li>
+        <li>
+          (e.g. transform: fill the missing value with 0 in the Test1 column)
+        </li>
+        <li>(e.g. transform: normalize Test1 column )</li>
+      </ul>
     </ul>
   );
 
@@ -97,7 +110,7 @@ const UpdateTableForm = ({
         placeholder="replace: find the <column name> in the table and replace the value with <desired value>"
         className="border border-slate-900 p-1 mr-2 w-[50%] overflow-auto"
       />
-      <Button>confirm</Button>
+      <Button isLoading={isLoading}>confirm</Button>
       <ToastModal />
     </form>
   );

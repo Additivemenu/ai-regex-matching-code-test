@@ -1,5 +1,4 @@
 
-from django.shortcuts import render
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 import pandas as pd
@@ -9,22 +8,13 @@ from enum import Enum
 
 api = NinjaAPI()
 
-from regexapp.services.openai import query_open_ai_for_regex_replacement
 from regexapp.services.regex_replacement import handle_regex_replacement
 from regexapp.services.data_transformation import handle_data_transformation
-from regexapp.services.openai import query_open_ai_for_data_transformation
 from regexapp.ninja_schema.schema import TableUpdateRequestBody
-
-from django.conf import settings
-
 
 @api.get("/", )
 def hello(request):
-    # user_query = "fill the missing values in the column 'age' with 0.0"
-    user_query = "normalize the column 'age'"
-    LLM_res = query_open_ai_for_data_transformation(user_query)
-    print('LLM_res:', LLM_res.to_dict())
-    return JsonResponse({"data": LLM_res.to_dict()})
+    return JsonResponse({"message": "Hello World"})
     
 allowed_content_types = [
     'text/csv', 
@@ -58,13 +48,11 @@ def upload_csv(request, file: UploadedFile = File(...)):
             value = value.strip('"')
             return value
         return value
-    df = df.applymap(remove_quotes)
+    df = df.map(remove_quotes)
     
     # Convert DataFrame to a dictionary for easy JSON serialization
     data = df.to_dict(orient='records')
     
-    # TODO: store the table in a mongodb database running in docker -> api url should include file or table id
-
     return JsonResponse({"data": data})
 
 
