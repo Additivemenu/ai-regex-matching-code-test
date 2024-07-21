@@ -26,15 +26,25 @@ def hello(request):
     print('LLM_res:', LLM_res.to_dict())
     return JsonResponse({"data": LLM_res.to_dict()})
     
-
+allowed_content_types = [
+    'text/csv', 
+    'application/vnd.ms-excel', 
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+]
 
 @api.post("/file")
 def upload_csv(request, file: UploadedFile = File(...)):
-    # TODO: additionally -> need to  consider uploading large files
+    
+    if file.content_type not in allowed_content_types:
+        raise HttpError(400, "Invalid file type. Only CSV or Excel files are allowed.")
 
     # Read the CSV file into a pandas DataFrame
-    df = pd.read_csv(file)
-    
+    df = None
+    if file.content_type == 'text/csv':
+        df = pd.read_csv(file)
+    else:
+        df = pd.read_excel(file)
+
     # formatting the table data
     df = df.where(pd.notnull(df), None)
     

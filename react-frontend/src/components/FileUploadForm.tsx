@@ -43,7 +43,6 @@ const FileUploadForm = ({ setParsedFileData }: IFileUploadFormProps) => {
   return (
     <Card className="fileUpload-card">
       <form onSubmit={handleSubmit}>
-        {/* TODO: encapsulate it as a input field with error prompt */}
         <div className="mb-2">
           <label htmlFor="file-upload">
             please upload a csv or excel file for processing

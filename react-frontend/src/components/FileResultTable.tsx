@@ -99,7 +99,7 @@ const FileResultTable = ({
               <TableRow>
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-                  colSpan={3}
+                  colSpan={headers.length}
                   count={tableData.length}
                   rowsPerPage={rowsPerPage}
                   page={page}

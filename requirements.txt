@@ -14,6 +14,7 @@ Django==4.2.14
 django-cors-headers==4.4.0
 django-environ==0.11.2
 django-ninja==1.2.1
+et-xmlfile==1.1.0
 exceptiongroup==1.2.2
 h11==0.14.0
 httpcore==1.0.5
@@ -22,6 +23,7 @@ idna==3.7
 kombu==5.3.7
 numpy==2.0.0
 openai==1.35.13
+openpyxl==3.1.5
 pandas==2.2.2
 prompt_toolkit==3.0.47
 pydantic==2.8.2
@@ -37,3 +39,4 @@ typing_extensions==4.12.2
 tzdata==2024.1
 vine==5.1.0
 wcwidth==0.2.13
+xlrd==2.0.1

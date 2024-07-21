@@ -74,6 +74,9 @@ const UpdateTableForm = ({
         (e.g. replace: find the state column and replace value 'TX' with
         'Texas')
       </li>
+      <li>
+        (e.g. transform: fill the missing value with 0 in the Test1 column)
+      </li>
       <li>(e.g. transform: normalize Test1 column )</li>
     </ul>
   );
@@ -91,7 +94,7 @@ const UpdateTableForm = ({
       <input
         id="user-prompt"
         type="text"
-        placeholder="find the <column name> in the table and replace the value with <desired value>"
+        placeholder="replace: find the <column name> in the table and replace the value with <desired value>"
         className="border border-slate-900 p-1 mr-2 w-[50%] overflow-auto"
       />
       <Button>confirm</Button>
