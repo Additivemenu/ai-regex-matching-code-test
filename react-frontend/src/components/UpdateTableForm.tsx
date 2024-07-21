@@ -24,7 +24,7 @@ const UpdateTableForm = ({
 
     if (parsedFileData.length === 0) {
       openToast({
-        toastMessage: "Please upload a file first!",
+        toastMessage: "There is no data in the table, please upload a csv or excel file first!",
         toastLevel: "error",
       });
       return;

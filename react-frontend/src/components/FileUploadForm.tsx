@@ -20,6 +20,14 @@ const FileUploadForm = ({ setParsedFileData }: IFileUploadFormProps) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault(); // prevent the default refreshing browser behavior on form submit
 
+    if (!selectedFile) {
+      openToast({
+        toastMessage: "Please select a file to upload",
+        toastLevel: "error",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       await handleUpload();
