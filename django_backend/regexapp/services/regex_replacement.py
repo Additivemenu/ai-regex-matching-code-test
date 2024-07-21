@@ -2,8 +2,9 @@ import pandas as pd
 from regexapp.services.openai import query_open_ai_for_regex_replacement
 from http.client import HTTPException
 import re
+from celery import shared_task
 
-
+@shared_task
 def handle_regex_replacement(table_data, user_query):
     # LLM_res = queryOpenAI("find the email address column in the table and replace them with 'hello'")
     print('------------ start querying OpenAI API ------------')

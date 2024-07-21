@@ -79,10 +79,12 @@ def update_table(request, request_body: TableUpdateRequestBody):
     LLM_res = None
     if query_type == QueryType.REPLACE:
         print('handle replace query')
-        df, LLM_res = handle_regex_replacement(table_data, user_query)
+        result =  handle_regex_replacement.delay(table_data, user_query)   # TODO: put this in task queue
+        df, LLM_res = result.get(timeout=300) 
+        
     elif query_type == QueryType.TRANSFORM:
         print('handle transform query')
-        df, LLM_res = handle_data_transformation(table_data, user_query)
+        df, LLM_res = handle_data_transformation(table_data, user_query) # TODO: put this in task queue
 
 
     updated_table_data = df.to_dict(orient='records')
