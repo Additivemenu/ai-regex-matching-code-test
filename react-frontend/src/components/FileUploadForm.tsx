@@ -4,6 +4,7 @@ import Button from "./buttons/Button";
 import useFileUpload from "../hooks/useUpload";
 import { Data } from "../interfaces/TableData";
 import useToast from "../hooks/useToast";
+import { AxiosError } from "axios";
 
 interface IFileUploadFormProps {
   setParsedFileData: React.Dispatch<React.SetStateAction<Data[]>>;
@@ -37,7 +38,12 @@ const FileUploadForm = ({ setParsedFileData }: IFileUploadFormProps) => {
         toastLevel: "success",
       });
     } catch (error) {
-      if (error instanceof Error) {
+      if (error instanceof AxiosError) {
+        openToast({
+          toastMessage: "Error uploading file: " + error!.response!.data.detail,
+          toastLevel: "error",
+        });
+      } else if (error instanceof Error) {
         openToast({
           toastMessage: "Error uploading file: " + error.message,
           toastLevel: "error",

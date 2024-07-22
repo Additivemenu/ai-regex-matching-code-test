@@ -54,6 +54,12 @@ const UpdateTableForm = ({
             error.message,
           toastLevel: "error",
         });
+      } else if (error instanceof Error) {
+        console.error("Error updating table:", error);
+        openToast({
+          toastMessage: "Error updating table: " + error.message,
+          toastLevel: "error",
+        });
       }
     } finally {
       form.reset();

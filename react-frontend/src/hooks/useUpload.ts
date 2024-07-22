@@ -42,8 +42,9 @@ const useFileUpload = (
         setUploadStatus(FileUploadStatus.FILE_UPLOADED_SUCCESSFULLY);
       }
     } catch (error) {
-      console.error("Error uploading file:", error);
       setUploadStatus(FileUploadStatus.ERROR_UPLOADING_FILE);
+      throw error;
+      
     }
   };
 

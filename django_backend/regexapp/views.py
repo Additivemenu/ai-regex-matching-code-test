@@ -30,32 +30,34 @@ def upload_csv(request, file: UploadedFile = File(...)):
 
     # Read the CSV file into a pandas DataFrame
     df = None
-    if file.content_type == 'text/csv':
-        df = pd.read_csv(file)
-    else:
-        df = pd.read_excel(file)
+    try: 
+        if file.content_type == 'text/csv':
+            df = pd.read_csv(file)
+        else:
+            df = pd.read_excel(file)
 
-    # formatting the table data
-    df = df.where(pd.notnull(df), None)
-    
-    # Remove leading and trailing spaces from column names
-    df.columns = df.columns.str.strip() 
-    
-    # Remove redundant starting and ending quotes from the values
-    def remove_quotes(value):
-        if isinstance(value, str):
-            value = value.strip()
-            value = value.strip('"')
+        # formatting the table data
+        df = df.where(pd.notnull(df), None)
+        
+        # Remove leading and trailing spaces from column names
+        df.columns = df.columns.str.strip() 
+        
+        # Remove redundant starting and ending quotes from the values
+        def remove_quotes(value):
+            if isinstance(value, str):
+                value = value.strip()
+                value = value.strip('"')
+                return value
             return value
-        return value
-    df = df.map(remove_quotes)
+        df = df.map(remove_quotes)
+        
+        # Convert DataFrame to a dictionary for easy JSON serialization
+        data = df.to_dict(orient='records')
+        return JsonResponse({"data": data})
+    except Exception as e:
+        print('upload file error', e)
+        raise HttpError(400, str(e))
     
-    # Convert DataFrame to a dictionary for easy JSON serialization
-    data = df.to_dict(orient='records')
-    
-    return JsonResponse({"data": data})
-
-
 class QueryType(str, Enum):
     REPLACE = "replace"
     TRANSFORM = "transform"
