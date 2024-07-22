@@ -71,12 +71,12 @@ const UpdateTableForm = ({
   // jsx -----------------------------------------------------------------------
   const samplePromptList = (
     <ul className="text-sm text-slate-400">
-      <li>
+      <li className="text-green-700">
         note please specify exactly one column name{" "} in the prompt, no need to care about case sensitivity, our system will automatically match the column name in your prompt
       </li>
       <ul>
         <li className="text-slate-900">
-          for regex matching and replacement query, please specify 'replace:' at
+          1. For regex matching and replacement query, please specify 'replace:' at
           the start of your prompt
         </li>
         <li>
@@ -90,7 +90,7 @@ const UpdateTableForm = ({
       </ul>
       <ul>
         <li className="text-slate-900">
-          for data transformation query, please specify 'transform:' at the
+          2. For data transformation query, please specify 'transform:' at the
           start of your prompt - note only{" "}
           <span className="text-blue-500">filling missing value</span> and{" "}
           <span className="text-blue-500">

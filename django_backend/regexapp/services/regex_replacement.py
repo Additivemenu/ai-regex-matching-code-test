@@ -15,7 +15,7 @@ def handle_regex_replacement(table_data, user_query):
 
     # verify if user specified column name is really in the table data
     if LLM_res.column_name not in table_data_headers:
-        raise HttpError(404, "Column name not found in table data, please check your spelling (note column name should be case sensitive) and type in a valid table header name")
+        raise HttpError(404, "Column name not found in table data, please check your spelling and type in a valid table header name")
     print('table data headers:', table_data_headers)
 
 
@@ -23,6 +23,10 @@ def handle_regex_replacement(table_data, user_query):
     df = pd.DataFrame(table_data)
 
     # ! data replacement query
-    df[LLM_res.column_name] = df[LLM_res.column_name].apply(lambda x: re.sub(LLM_res.regex_pattern, LLM_res.replacement, x) if pd.notnull(x) else x)  
-
+    try: 
+        df[LLM_res.column_name] = df[LLM_res.column_name].apply(lambda x: re.sub(LLM_res.regex_pattern, LLM_res.replacement, x) if pd.notnull(x) else x)  
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HttpError(500, f"Error: unexpected error occured when replacing data in column {LLM_res.column_name} - please check if your are using the right query type")
+        
     return df, LLM_res

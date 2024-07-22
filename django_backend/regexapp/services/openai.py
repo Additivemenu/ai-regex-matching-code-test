@@ -12,16 +12,18 @@ client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 # TODO: use class instead, not dictionary
 class RegexReplacementOpenAIQueryResponse:
-    def __init__(self, regex_pattern: str, replacement: str, column_name: str):
+    def __init__(self, regex_pattern: str, replacement: str, column_name: str, is_valid: bool):
         self.regex_pattern = regex_pattern 
         self.replacement = replacement 
         self.column_name = column_name
+        self.is_valid = is_valid
     
     def to_dict(self):
         return {
             'regex_pattern': self.regex_pattern,
             'replacement': self.replacement,
-            'column_name': self.column_name
+            'column_name': self.column_name,
+            'is_valid': self.is_valid
         }
 
 
@@ -39,7 +41,8 @@ def query_open_ai_for_regex_replacement(query:str, table_headers: List[str]) -> 
                 {"role": "user", "content": f"Given the natural language query: '{query}', return in JSON format: "+
                                                 "field 'regex_pattern': the regex expression that user want to match, please don't use greedy matching like '.*' - if you cannot find it give it a null value, " + 
                                                 "field 'replacement': the replacement value that user want to replace the matching regex pattern - if you cannot find it give it a null value, "+
-                                               f"field 'column_name': the column name that user want to perform operation, based on '{query}', return a closest column name from column name list [{table_headers_str}], the returned value should be case-sensitive and there should be only one returned value - if you cannot find it give it a null value"},
+                                               f"field 'column_name': the column name that user want to perform operation, based on '{query}', return a closest column name from column name list [{table_headers_str}], the returned value should be case-sensitive and there should be only one returned value - if you cannot find it give it a null value" + 
+                                                "field 'is_valid': a boolean value to indicate if the query is valid or not, if the query is invalid, return false, otherwise return true; note only 'regex replacing and replacement' type query are valid queries; if you find multiple column names, the query is also invalid"},
             ]
         )
         raw_result = completion.choices[0].message
@@ -52,22 +55,29 @@ def query_open_ai_for_regex_replacement(query:str, table_headers: List[str]) -> 
             'regex_pattern': 'regex', 
             'replacement': 'replacement value', 
             'column_name': 'column name'
+            'is_valid': True
         }
         '''
-        # Extract the JSON content using regex to remove the surrounding backticks and "json" label (as OpenAI api return markdown format json) 
-        json_content_str = re.search(r'```json\s*({.*})\s*```', raw_result.content, re.DOTALL).group(1) 
-        parsed_dict = json.loads(json_content_str)  
-        print('parsed LLM response: ', parsed_dict)
+        
+        try:
+            # Extract the JSON content using regex to remove the surrounding backticks and "json" label (as OpenAI api return markdown format json) 
+            json_content_str = re.search(r'```json\s*({.*})\s*```', raw_result.content, re.DOTALL).group(1) 
+            parsed_dict = json.loads(json_content_str)  
+            print('parsed LLM response: ', parsed_dict)
+        except Exception as e:
+            raise HttpError(500, "Unexpected error: OpenAI API response is not in JSON format, please check if you are using the correct query type and try again")
 
         # validate the parsed dictionary following the desired format
-        required_fields = ['regex_pattern', 'replacement', 'column_name']
+        required_fields = ['regex_pattern', 'replacement', 'column_name', 'is_valid']
         missing_fields = [field for field in required_fields if field not in parsed_dict] # Check if all required fields are present
         if missing_fields:
             raise HttpError(500, f"Unexpected error: Missing fields from OpenAI API calling- {', '.join(missing_fields)}, please try again")
         if any([parsed_dict[field] is None for field in required_fields]):
             raise HttpError(500, "Unexpected error: OpenAI API response contains None value, please check if you are using the correct query type and try again")
-    
-    
+
+        if not parsed_dict['is_valid']:
+            raise HttpError(400, "Bad request: Invalid query, please check if you are using the correct query type or if there is exactly only one column specified, and try again")
+        
         # validate if user specify a column name 
         if not parsed_dict['column_name']:
             raise HttpError(400, "Bad request: Column name is not specified, please specify a column name in the query")
@@ -76,7 +86,7 @@ def query_open_ai_for_regex_replacement(query:str, table_headers: List[str]) -> 
         if parsed_dict['regex_pattern'] == ".*":
             parsed_dict['regex_pattern'] = ".+"
         
-        return RegexReplacementOpenAIQueryResponse(parsed_dict['regex_pattern'], parsed_dict['replacement'], parsed_dict['column_name'])
+        return RegexReplacementOpenAIQueryResponse(parsed_dict['regex_pattern'], parsed_dict['replacement'], parsed_dict['column_name'], parsed_dict['is_valid'])
     except Exception as e:
         raise e
 
@@ -85,16 +95,18 @@ class TransformationType(str, Enum):
     FILL_MISSING = "fill_missing"
 
 class DataTransformationOpenAIQueryResponse:
-    def __init__(self, transformation_type:TransformationType,  payload: Optional[float or int], column_name: str): 
+    def __init__(self, transformation_type:TransformationType,  payload: Optional[float or int], column_name: str, is_valid: bool): 
         self.transformation_type = transformation_type
         self.payload = payload
         self.column_name = column_name
+        self.is_valid = is_valid
         
     def to_dict(self):
         return {
             'transformation_type': self.transformation_type,
             'payload': self.payload,
-            'column_name': self.column_name
+            'column_name': self.column_name,
+            'is_valid': self.is_valid
         }    
 
 
@@ -113,7 +125,8 @@ def query_open_ai_for_data_transformation(query:str, table_headers:List[str]) ->
                 {"role": "user", "content": f"Given the natural language query: '{query}', return in JSON format:"+ 
                                                 "field 'transformation_type': options are 'fill_missing' or 'normalize' - if you cannot find it give it a null value,  " +
                                                 "field 'payload': the missing value that user want to fill a column, this only applies to 'fill_missing' transformation type - if you cannot find it give it a null value," +
-                                               f"field 'column_name': the column name that user want to perform operation, based on '{query}', return a closest column name from column name list [{table_headers_str}], the returned value should be case-sensitive and there should be only one returned value - if you cannot find it give it a null value"},
+                                               f"field 'column_name': the column name that user want to perform operation, based on '{query}', return a closest column name from column name list [{table_headers_str}], the returned value should be case-sensitive and there should be only one returned value - if you cannot find it give it a null value" + 
+                                                "field 'is_valid': a boolean value to indicate if the query is valid or not, if the query is invalid, return false, otherwise return true; note only 'fill missing values' query and 'normalize data' query are valid queries; if you find multiple column names, the query is also invalid"},
             ]
         )
         raw_result = completion.choices[0].message
@@ -126,27 +139,33 @@ def query_open_ai_for_data_transformation(query:str, table_headers:List[str]) ->
             'transformation_type': 'fill_missing' or 'normalize', 
             'payload': 'e.g. missing value that user wants to fill', 
             'column_name': 'column name'
+            'is_true': True
         }
         '''
         # Extract the JSON content using regex to remove the surrounding backticks and "json" label (as OpenAI api return markdown format json) 
-        json_content_str = re.search(r'```json\s*({.*})\s*```', raw_result.content, re.DOTALL).group(1) 
-        parsed_dict = json.loads(json_content_str)  
-        print('parsed LLM response: ', parsed_dict)
+        try:
+            json_content_str = re.search(r'```json\s*({.*})\s*```', raw_result.content, re.DOTALL).group(1) 
+            parsed_dict = json.loads(json_content_str)  
+            print('parsed LLM response: ', parsed_dict)
+        except Exception as e:
+            raise HttpError(500, "Unexpected error: OpenAI API response is not in JSON format, please check if you are using the correct query type and try again")
 
         # validate the parsed dictionary following the desired format
-        required_fields = ['transformation_type', 'payload', 'column_name']
+        required_fields = ['transformation_type', 'payload', 'column_name', 'is_valid']
         missing_fields = [field for field in required_fields if field not in parsed_dict] # Check if all required fields are present
         if missing_fields:
             raise HttpError(500, f"Unexpected error: Missing fields from OpenAI API calling- {', '.join(missing_fields)}, please try again")
         if any([parsed_dict[field] is None for field in ['transformation_type','column_name']]):
             raise HttpError(500, "Unexpected error: OpenAI API response contains None value, please check if you are using the correct query type and try again")
     
-    
+        if not parsed_dict['is_valid']:
+            raise HttpError(400, "Bad request: Invalid query, please check if you are using the correct query type or if there is exactly only one column specified, and try again")
+        
         # validate if user specify a column name 
         if not parsed_dict['column_name']:
             raise HttpError(400, "Bad request: Column name is not specified, please specify a column name in the query")
         
 
-        return DataTransformationOpenAIQueryResponse(parsed_dict['transformation_type'], parsed_dict['payload'], parsed_dict['column_name'])
+        return DataTransformationOpenAIQueryResponse(parsed_dict['transformation_type'], parsed_dict['payload'], parsed_dict['column_name'], parsed_dict['is_valid'])
     except Exception as e:
         raise e
