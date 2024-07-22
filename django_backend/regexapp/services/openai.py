@@ -155,7 +155,7 @@ def query_open_ai_for_data_transformation(query:str, table_headers:List[str]) ->
         missing_fields = [field for field in required_fields if field not in parsed_dict] # Check if all required fields are present
         if missing_fields:
             raise HttpError(500, f"Unexpected error: Missing fields from OpenAI API calling- {', '.join(missing_fields)}, please try again")
-        if any([parsed_dict[field] is None for field in ['transformation_type','column_name']]):
+        if any([parsed_dict[field] is None for field in ['transformation_type','column_name', 'is_valid']]):
             raise HttpError(500, "Unexpected error: OpenAI API response contains None value, please check if you are using the correct query type and try again")
     
         if not parsed_dict['is_valid']:
