@@ -37,8 +37,9 @@ const useFileUpload = (
       const response = await uploadFileRequest(selectedFile);
 
       if (response.status === 200) {
-        // console.log("response data:", response.data.data);
-        setParsedFileData(response.data.data); // FIXME: when to use JSON.parse(response.data) ?
+        // debugger;
+
+        setParsedFileData(JSON.parse(response.data.data)); 
         setUploadStatus(FileUploadStatus.FILE_UPLOADED_SUCCESSFULLY);
       }
     } catch (error) {

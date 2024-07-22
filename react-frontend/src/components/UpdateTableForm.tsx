@@ -39,7 +39,7 @@ const UpdateTableForm = ({
       setIsLoading(true);
       const response = await updateTableDataRequest(userPrompt, parsedFileData);
 
-      setParsedFileData(response.data.updated_table_data as Data[]);
+      setParsedFileData(JSON.parse(response.data.updated_table_data) as Data[]);
       setHighlightColumn(response.data.LLM_res.column_name as string);
       openToast({
         toastMessage: "Table updated successfully!",

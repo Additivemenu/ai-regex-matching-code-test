@@ -24,6 +24,9 @@ const FileResultTable = ({
   tableData,
   highlightColumn,
 }: FileResultTableProps) => {
+
+  // debugger;
+
   // Extract the keys from the first object to dynamically create table headers
   const headers = tableData.length > 0 ? Object.keys(tableData[0]) : [];
 

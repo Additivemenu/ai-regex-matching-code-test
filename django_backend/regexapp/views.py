@@ -52,7 +52,8 @@ def upload_csv(request, file: UploadedFile = File(...)):
         df = df.map(remove_quotes)
         
         # Convert DataFrame to a dictionary for easy JSON serialization
-        data = df.to_dict(orient='records')
+        # data = df.to_dict(orient='records')  # ! to_dict() return python dict, not JSON serializable
+        data = df.to_json(orient='records')
         return JsonResponse({"data": data})
     except Exception as e:
         print('upload file error', e)
@@ -86,7 +87,8 @@ def update_table(request, request_body: TableUpdateRequestBody):
         df, LLM_res = handle_data_transformation(table_data, user_query)
 
 
-    updated_table_data = df.to_dict(orient='records')
+    # updated_table_data = df.to_dict(orient='records')
+    updated_table_data = df.to_json(orient='records')
     return JsonResponse({
         "user_query": user_query, 
         "LLM_res": LLM_res.to_dict(),
