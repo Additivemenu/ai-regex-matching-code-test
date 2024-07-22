@@ -24,7 +24,8 @@ const UpdateTableForm = ({
 
     if (parsedFileData.length === 0) {
       openToast({
-        toastMessage: "There is no data in the table, please upload a csv or excel file first!",
+        toastMessage:
+          "There is no data in the table, please upload a csv or excel file first!",
         toastLevel: "error",
       });
       return;
@@ -71,8 +72,7 @@ const UpdateTableForm = ({
   const samplePromptList = (
     <ul className="text-sm text-slate-400">
       <li>
-        note please specify exactly one column name{" "}
-        <span className="font-bold">with case sensitivity</span> in the prompt
+        note please specify exactly one column name{" "} in the prompt, no need to care about case sensitivity, our system will automatically match the column name in your prompt
       </li>
       <ul>
         <li className="text-slate-900">
@@ -80,7 +80,8 @@ const UpdateTableForm = ({
           the start of your prompt
         </li>
         <li>
-          (e.g. replace: find the Website column and remove 'http://' and 'https://' at the start)
+          (e.g. replace: find the Website column and remove 'http://' and
+          'https://' at the start)
         </li>
         <li>
           (e.g. replace: find the state column and replace value 'TX' with
@@ -90,7 +91,12 @@ const UpdateTableForm = ({
       <ul>
         <li className="text-slate-900">
           for data transformation query, please specify 'transform:' at the
-          start of your prompt - note only filling missing value and normalize a numerical column is supported {" "}
+          start of your prompt - note only{" "}
+          <span className="text-blue-500">filling missing value</span> and{" "}
+          <span className="text-blue-500">
+            normalize a numerical column
+          </span>{" "}
+          is currently supported{" "}
         </li>
         <li>
           (e.g. transform: fill the missing value with 0 in the Test1 column)

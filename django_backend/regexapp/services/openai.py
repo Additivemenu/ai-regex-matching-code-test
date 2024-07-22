@@ -5,6 +5,7 @@ from ninja.errors import HttpError
 from openai import OpenAI
 from django.conf import settings
 from enum import Enum
+from typing import List
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 # print('inside queryOpenAI: ',settings.OPENAI_API_KEY)
@@ -24,15 +25,21 @@ class RegexReplacementOpenAIQueryResponse:
         }
 
 
-def query_open_ai_for_regex_replacement(query:str) -> RegexReplacementOpenAIQueryResponse:
-   
+def query_open_ai_for_regex_replacement(query:str, table_headers: List[str]) -> RegexReplacementOpenAIQueryResponse:
+    print('in open ai regex query:',table_headers)
+    table_headers_str = ",".join(table_headers)
+    print('table header list string:', table_headers_str)
+    
     try: 
         # ! should we send table data to OpenAI API as well?
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a regex assistant, skilled in converting natural language queries into regex expressions. The regex expressions will be used to manipulate data in a table. There are 2 types of query: one is to replace table value in a column with new value, one is to apply some regex transformation to the value in a column. Please provide the regex expression for the given natural language query."},
-                {"role": "user", "content": f"Given the natural language query: '{query}', return in JSON format: \n field 'regex_pattern': the regex expression that user want to match, please don't use greedy matching like '.*' - if you cannot find it give it a null value,  \n field 'replacement': the replacement value that user want to replace the matching regex pattern - if you cannot find it give it a null value,\n field 'column_name': the column name that user want to perform operation, it should be case-sensitive - if you cannot find it give it a null value"},
+                {"role": "user", "content": f"Given the natural language query: '{query}', return in JSON format: "+
+                                                "field 'regex_pattern': the regex expression that user want to match, please don't use greedy matching like '.*' - if you cannot find it give it a null value, " + 
+                                                "field 'replacement': the replacement value that user want to replace the matching regex pattern - if you cannot find it give it a null value, "+
+                                               f"field 'column_name': the column name that user want to perform operation, based on '{query}', return a closest column name from column name list [{table_headers_str}], the returned value should be case-sensitive and there should be only one returned value - if you cannot find it give it a null value"},
             ]
         )
         raw_result = completion.choices[0].message
@@ -91,15 +98,22 @@ class DataTransformationOpenAIQueryResponse:
         }    
 
 
-def query_open_ai_for_data_transformation(query:str) -> DataTransformationOpenAIQueryResponse:
+def query_open_ai_for_data_transformation(query:str, table_headers:List[str]) -> DataTransformationOpenAIQueryResponse:
 
+    print('in open ai data transform query:',table_headers)
+    table_headers_str = ",".join(table_headers)
+    print('table header list string:', table_headers_str)
+    
     try: 
         # ! should we send table data to OpenAI API as well?
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are going to extract useful information given a user query in natural language. The information will be used to transform data in a table. There are 2 types of query: one is to fill missing values in a column, one is to normalize the values in a column. Please provide the transformation type and the payload for the given natural language query."},
-                {"role": "user", "content": f"Given the natural language query: '{query}', return in JSON format: \n field 'transformation_type': options are 'fill_missing' or 'normalize' - if you cannot find it give it a null value,  \n field 'payload': the missing value that user want to fill a column, this only applies to 'fill_missing' transformation type - if you cannot find it give it a null value,\n field 'column_name': the column name that user want to perform operation, it should be case-sensitive - if you cannot find it give it a null value"},
+                {"role": "user", "content": f"Given the natural language query: '{query}', return in JSON format:"+ 
+                                                "field 'transformation_type': options are 'fill_missing' or 'normalize' - if you cannot find it give it a null value,  " +
+                                                "field 'payload': the missing value that user want to fill a column, this only applies to 'fill_missing' transformation type - if you cannot find it give it a null value," +
+                                               f"field 'column_name': the column name that user want to perform operation, based on '{query}', return a closest column name from column name list [{table_headers_str}], the returned value should be case-sensitive and there should be only one returned value - if you cannot find it give it a null value"},
             ]
         )
         raw_result = completion.choices[0].message
