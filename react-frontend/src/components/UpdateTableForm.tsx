@@ -51,8 +51,8 @@ const UpdateTableForm = ({
         console.error("Error updating table:", error);
         openToast({
           toastMessage:
-            "Error updating table: " + error.response!.data.detail ??
-            error.message,
+            "Error updating table: " + (error.response?.data.detail ??
+            error.message),
           toastLevel: "error",
         });
       } else if (error instanceof Error) {
@@ -72,12 +72,14 @@ const UpdateTableForm = ({
   const samplePromptList = (
     <ul className="text-sm text-slate-400">
       <li className="text-green-700">
-        note please specify exactly one column name{" "} in the prompt, no need to care about case sensitivity, our system will automatically match the column name in your prompt
+        note please specify exactly one column name in the prompt, no need to
+        care about case sensitivity, our system will automatically match the
+        column name in your prompt
       </li>
       <ul>
         <li className="text-slate-900">
-          1. For regex matching and replacement query, please specify 'replace:' at
-          the start of your prompt
+          1. For regex matching and replacement query, please specify 'replace:'
+          at the start of your prompt
         </li>
         <li>
           (e.g. replace: find the Website column and remove 'http://' and
@@ -93,10 +95,8 @@ const UpdateTableForm = ({
           2. For data transformation query, please specify 'transform:' at the
           start of your prompt - note only{" "}
           <span className="text-blue-500">filling missing value</span> and{" "}
-          <span className="text-blue-500">
-            normalize a numerical column
-          </span>{" "}
-          is currently supported{" "}
+          <span className="text-blue-500">normalize a numerical column</span> is
+          currently supported{" "}
         </li>
         <li>
           (e.g. transform: fill the missing value with 0 in the Test1 column)
